@@ -1,0 +1,4 @@
+--editable .
+
+nose
+coverage

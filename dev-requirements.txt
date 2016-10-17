@@ -1,4 +1,5 @@
 --editable .
 
-nose
-coverage
+nose == 1.3.7
+coverage == 4.2
+coveralls == 1.1

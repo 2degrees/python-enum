@@ -2,9 +2,8 @@ from setuptools import setup
 
 
 setup(
-    name='enum',
-    install_requires=[
-        'Django >= 1.8',
-    ],
+    version='0.1',
+    description='An enumeration data type for Python',
+    name='python-enumeration',
     py_modules=['enumeration'],
 )

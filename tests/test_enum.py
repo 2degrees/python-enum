@@ -2,6 +2,7 @@
 from collections import OrderedDict
 
 from nose.tools import assert_false
+from nose.tools import assert_is_instance
 from nose.tools import assert_raises
 from nose.tools import assert_raises_regexp
 from nose.tools import eq_
@@ -17,7 +18,7 @@ AGES_OF_MAN = (
     'teenager',
     'adult',
     'elderly',
-    )
+)
 
 
 class TestEnum(object):
@@ -28,10 +29,10 @@ class TestEnum(object):
             *zip(
                 AGES_OF_MAN,
                 ('BABY', 'TODDLER', 'CHILD', 'TEENAGER', 'ADULT', 'ELDERLY')
-                )
             )
+        )
 
-    #{ Constructor tests
+    # { Constructor tests
 
     def test_constructor_with_non_string_values(self):
         """Values must be strings."""
@@ -49,7 +50,7 @@ class TestEnum(object):
         """Labels must be unique."""
         assert_raises(AssertionError, Enum, ('1', 'One'), ('1.0', 'One'))
 
-    #{ Enum item retrieval tests
+    # { Enum item retrieval tests
 
     def test_getattr_for_known_label(self):
         """Enum labels map to their respective EnumItem instances."""
@@ -64,7 +65,7 @@ class TestEnum(object):
 
         self.ages_of_man_enum.COW
 
-    #{ Attribute setting tests
+    # { Attribute setting tests
 
     @raises(AssertionError)
     def test_enum_item_overriding(self):
@@ -79,7 +80,7 @@ class TestEnum(object):
 
         eq_(self.ages_of_man_enum.other, 'Something')
 
-    #{ Contains test
+    # { Contains test
 
     def test_contains_with_known_value(self):
         ok_('baby' in self.ages_of_man_enum)
@@ -87,7 +88,7 @@ class TestEnum(object):
     def test_contains_with_unknown_value(self):
         assert_false('sheep' in self.ages_of_man_enum)
 
-    #}
+    # }
 
     def test_iter(self):
         """Iteration happens over the enum values."""
@@ -105,7 +106,7 @@ class TestEnum(object):
             ('teenager', self.ages_of_man_enum.TEENAGER),
             ('adult', self.ages_of_man_enum.ADULT),
             ('elderly', self.ages_of_man_enum.ELDERLY),
-            ))
+        ))
 
         eq_(self.ages_of_man_enum.get_items_by_values(),
             expected_items_by_values)
@@ -114,7 +115,7 @@ class TestEnum(object):
         eq_(
             self.ages_of_man_enum.ADULT,
             self.ages_of_man_enum.get_item_by_value('adult'),
-            )
+        )
 
     def test_getting_non_existing_item_by_value(self):
         non_existing_item_value = 'sheep'
@@ -123,7 +124,7 @@ class TestEnum(object):
             non_existing_item_value,
             self.ages_of_man_enum.get_item_by_value,
             non_existing_item_value,
-            )
+        )
 
     def test_setting_ui_labels(self):
         assert_false(self.ages_of_man_enum.has_ui_labels)
@@ -135,7 +136,7 @@ class TestEnum(object):
             self.ages_of_man_enum.TEENAGER: "Teenager",
             self.ages_of_man_enum.ADULT: "Adult",
             self.ages_of_man_enum.ELDERLY: "Elderly",
-            }
+        }
         self.ages_of_man_enum.set_ui_labels(items_ui_labels)
         for enum_item, item_label in items_ui_labels.items():
             eq_(enum_item._item_ui_label, item_label)
@@ -146,7 +147,7 @@ class TestEnum(object):
         """Every enum item has to receive a label"""
         items_ui_labels = {
             self.ages_of_man_enum.BABY: "Baby",
-            }
+        }
 
         assert_raises(AssertionError,
                       self.ages_of_man_enum.set_ui_labels,
@@ -162,10 +163,30 @@ class TestEnum(object):
             (self.ages_of_man_enum.TEENAGER, 'Teenager'),
             (self.ages_of_man_enum.ADULT, 'Adult'),
             (self.ages_of_man_enum.ELDERLY, 'Elderly'),
-            ))
+        ))
         self.ages_of_man_enum.set_ui_labels(items_ui_labels)
         eq_(self.ages_of_man_enum.get_ui_labels(),
             tuple(items_ui_labels.items()))
+
+    def test_subclassing(self):
+        """
+        The Enum can be sub-classed and a custom EnumItem implementation used.
+
+        """
+
+        class BetterEnumItem(EnumItem):
+            pass
+
+        class BetterEnum(Enum):
+            item_class = BetterEnumItem
+
+        better_enum = BetterEnum(
+            ('true', 'YES'),
+            ('false', 'NOPE'),
+        )
+
+        assert_is_instance(better_enum.YES, BetterEnumItem)
+        eq_("<BetterEnumItem: value='true', index=0>", repr(better_enum.YES))
 
 
 class TestEnumItem(object):
@@ -211,7 +232,7 @@ class TestEnumItem(object):
 
         eq_(hash(enum_item), hash(item_value))
 
-    #{ Equality tests
+    # { Equality tests
 
     def test_comparison_with_heterogenous_objects(self):
         """Rich comparison is only supported with items of the same enum."""
@@ -229,7 +250,7 @@ class TestEnumItem(object):
         assert_false(self.enum1_item1 != self.enum1_item1)
         assert_false(self.enum1_item1 != self.enum1_item1_copy)
 
-    #{ Inequality tests
+    # { Inequality tests
 
     def test_less_than(self):
         """The index is used when determining less than comparisons."""
@@ -261,7 +282,7 @@ class TestEnumItem(object):
         ok_(self.enum1_item1 >= self.enum1_item1_copy)
         assert_false(self.enum1_item1 >= self.enum1_item2)
 
-    #{ Tests for retrieving previous and subsequent values
+    # { Tests for retrieving previous and subsequent values
 
     def test_previous_values(self):
         eq_(self.enum1_item1.previous_values, tuple())
@@ -286,7 +307,7 @@ class TestEnumItem(object):
             ('adult', 'elderly'))
         eq_(enum1_last_item.subsequent_values_with_self, ('elderly',))
 
-    #{ Tests for setting and getting UI labels
+    # { Tests for setting and getting UI labels
 
     def test_setting_ui_label(self):
         item_ui_label = "Enum item 1 UI label"
@@ -303,4 +324,4 @@ class TestEnumItem(object):
         """Getting the UI label when it is unset raises an AssertionError"""
         self.enum1_item1.get_ui_label()
 
-    #}
+        # }

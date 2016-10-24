@@ -6,8 +6,111 @@ class NonExistingEnumItemError(Exception):
     pass
 
 
+class EnumItem(object):
+    """An item which exists within an Enum."""
+
+    def __init__(self, item_value, enum_values):
+        """
+        :param item_value: The value this item represents
+        :param item_value: :class:`basestring`
+        :param enum_values: All possible values in the parent Enum
+        :type enum_values: :class:`collections.Iterable`
+        """
+
+        super(EnumItem, self).__init__()
+
+        assert item_value in enum_values, \
+            "%r is not contained in the Enum's values" % item_value
+
+        self.enum_values = enum_values
+        self.item_value = item_value
+        self._item_index = self.enum_values.index(item_value)
+        self._item_ui_label = None
+
+    def __repr__(self):
+        return '<{}: value={!r}, index={!r}>'.format(
+            self.__class__.__name__,
+            self.item_value,
+            self._item_index,
+        )
+
+    def __str__(self):
+        """Return the str representation of the item values."""
+        return str(self.item_value)
+
+    def __len__(self):
+        """Return the length of the item value."""
+        return len(self.item_value)
+
+    def __hash__(self):
+        """Return the hash of the item value."""
+        return hash(self.item_value)
+
+    def __eq__(self, other):
+        return self._compare(other, eq)
+
+    def __ne__(self, other):
+        return self._compare(other, ne)
+
+    def __lt__(self, other):
+        return self._compare(other, lt)
+
+    def __le__(self, other):
+        return self._compare(other, le)
+
+    def __gt__(self, other):
+        return self._compare(other, gt)
+
+    def __ge__(self, other):
+        return self._compare(other, ge)
+
+    def _compare(self, other_item, operator):
+        if not isinstance(other_item, self.__class__):
+            comparison = NotImplemented
+        elif self.enum_values != other_item.enum_values:
+            comparison = NotImplemented
+        else:
+            comparison = operator(self._item_index, other_item._item_index)
+
+        return comparison
+
+    @property
+    def previous_values(self):
+        return self.enum_values[:self._item_index]
+
+    @property
+    def previous_values_with_self(self):
+        return self.enum_values[:(self._item_index + 1)]
+
+    @property
+    def subsequent_values(self):
+        return self.enum_values[(self._item_index + 1):]
+
+    @property
+    def subsequent_values_with_self(self):
+        return self.enum_values[self._item_index:]
+
+    def get_ui_label(self):
+        """
+        Retrieve the label for display to a user.
+        :raises: :exc:`AssertionError` if the UI label has not been set
+        """
+
+        assert self._item_ui_label is not None, \
+            'The UI label must be set before retrieving it'
+
+        return self._item_ui_label
+
+    def set_ui_label(self, label):
+        """Set the label for display to a user."""
+
+        self._item_ui_label = label
+
+
 class Enum(object):
     """An enumeration."""
+
+    item_class = EnumItem
 
     def __init__(self, *items):
         super(Enum, self).__init__()
@@ -28,7 +131,7 @@ class Enum(object):
             assert isinstance(label, str), \
                 'Label %r must be a string' % label
 
-            self._items[label] = EnumItem(value, values)
+            self._items[label] = self.item_class(value, values)
 
         self.has_ui_labels = False
 
@@ -109,102 +212,3 @@ class Enum(object):
             items_by_values[enum_item.item_value] = enum_item
 
         return items_by_values
-
-
-class EnumItem(object):
-    """An item which exists within an Enum."""
-
-    def __init__(self, item_value, enum_values):
-        """
-        :param item_value: The value this item represents
-        :param item_value: :class:`basestring`
-        :param enum_values: All possible values in the parent Enum
-        :type enum_values: :class:`collections.Iterable`
-        """
-
-        super(EnumItem, self).__init__()
-
-        assert item_value in enum_values, \
-            "%r is not contained in the Enum's values" % item_value
-
-        self.enum_values = enum_values
-        self.item_value = item_value
-        self._item_index = self.enum_values.index(item_value)
-        self._item_ui_label = None
-
-    def __repr__(self):
-        return '<EnumItem: value=%r, index=%r>' % (self.item_value,
-                                                   self._item_index,
-                                                   )
-
-    def __str__(self):
-        """Return the str representation of the item values."""
-        return str(self.item_value)
-
-    def __len__(self):
-        """Return the length of the item value."""
-        return len(self.item_value)
-
-    def __hash__(self):
-        """Return the hash of the item value."""
-        return hash(self.item_value)
-
-    def __eq__(self, other):
-        return self._compare(other, eq)
-
-    def __ne__(self, other):
-        return self._compare(other, ne)
-
-    def __lt__(self, other):
-        return self._compare(other, lt)
-
-    def __le__(self, other):
-        return self._compare(other, le)
-
-    def __gt__(self, other):
-        return self._compare(other, gt)
-
-    def __ge__(self, other):
-        return self._compare(other, ge)
-
-    def _compare(self, other_item, operator):
-        if not isinstance(other_item, self.__class__):
-            comparison = NotImplemented
-        elif self.enum_values != other_item.enum_values:
-            comparison = NotImplemented
-        else:
-            comparison = operator(self._item_index, other_item._item_index)
-
-        return comparison
-
-    @property
-    def previous_values(self):
-        return self.enum_values[:self._item_index]
-
-    @property
-    def previous_values_with_self(self):
-        return self.enum_values[:(self._item_index + 1)]
-
-    @property
-    def subsequent_values(self):
-        return self.enum_values[(self._item_index + 1):]
-
-    @property
-    def subsequent_values_with_self(self):
-        return self.enum_values[self._item_index:]
-
-    def get_ui_label(self):
-        """
-        Retrieve the label for display to a user.
-        :raises: :exc:`AssertionError` if the UI label has not been set
-        """
-
-        assert self._item_ui_label is not None, \
-            'The UI label must be set before retrieving it'
-
-        return self._item_ui_label
-
-    def set_ui_label(self, label):
-        """Set the label for display to a user."""
-
-        self._item_ui_label = label

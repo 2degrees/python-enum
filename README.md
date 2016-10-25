@@ -1,5 +1,7 @@
 # python-enumeration
 
+[![Build Status](https://travis-ci.org/2degrees/python-enumeration.svg?branch=master)](https://travis-ci.org/2degrees/python-enumeration)
+
 An enumeration data type for Python.
 
 ## Getting started

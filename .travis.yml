@@ -4,6 +4,6 @@ python:
   - "3.4"
   - "3.5"
 install: pip install -r dev-requirements.txt
-script:  coverage run --source=enumeration setup.py test
+script:  coverage run --source=enumeration setup.py nosetests
 after_success:
   - coveralls

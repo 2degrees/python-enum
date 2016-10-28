@@ -1,6 +1,7 @@
 # python-enumeration
 
-[![Build Status](https://travis-ci.org/2degrees/python-enumeration.svg?branch=master)](https://travis-ci.org/2degrees/python-enumeration)
+[![Build Status](https://travis-ci.org/2degrees/python-enumeration.svg?branch=master)](https://travis-ci.org/2degrees/python-enumeration) 
+[![Coverage Status](https://coveralls.io/repos/github/2degrees/python-enumeration/badge.svg?branch=master)](https://coveralls.io/github/2degrees/python-enumeration?branch=master)
 
 An enumeration data type for Python.
 
